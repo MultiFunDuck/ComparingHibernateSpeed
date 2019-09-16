@@ -5,6 +5,8 @@ import Randomizers.*;
 import org.hibernate.SessionFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -31,6 +33,7 @@ public class DataBaseInitilizer {
         this.entityManipulator = new EntityManipulator(sessionFactory);
     }
 
+    @MeasuredFunction(name = "InitilizeDatabase")
     public void initilizeNewDataBase() {
         long startTime, stopTime;
         float executionTime;
@@ -44,7 +47,6 @@ public class DataBaseInitilizer {
         stopTime = System.nanoTime();
         executionTime = (float) (stopTime - startTime) / (float) Math.pow(10, 9);
         System.out.printf("Execution time: %.6f seconds\n", executionTime);
-
 
 
         System.out.println("Initializing new database\n");
@@ -65,7 +67,6 @@ public class DataBaseInitilizer {
         stopTime = System.nanoTime();
         executionTime = (float) (stopTime - startTime) / (float) Math.pow(10, 9);
         System.out.printf("Execution time: %.6f seconds\n", executionTime);
-
 
 
         //Связывание сущностей друг с другом
@@ -104,33 +105,65 @@ public class DataBaseInitilizer {
         System.out.printf("Execution time: %.6f seconds\n", executionTime);
 
 
+
         //Заполнение базы созданными классами сущностей
-        System.out.println("Filling database with created data");
-        startTime = System.nanoTime();
-        entityManipulator.addEntityListToDB(games);
-        entityManipulator.addEntityListToDB(cities);
-        entityManipulator.addEntityListToDB(people);
-        entityManipulator.addEntityListToDB(projects);
-        entityManipulator.addEntityListToDB(tasks);
-        entityManipulator.addEntityListToDB(checklists);
-        stopTime = System.nanoTime();
-        executionTime = (float) (stopTime - startTime) / (float) Math.pow(10, 9);
-        System.out.printf("Execution time: %.6f seconds\n", executionTime);
+        try {
+            System.out.println("Filling database with created data");
+            startTime = System.nanoTime();
+            entityManipulator.addEntityListToDB(games);
+            entityManipulator.addEntityListToDB(cities);
+            entityManipulator.addEntityListToDB(people);
+            entityManipulator.addEntityListToDB(projects);
+            entityManipulator.addEntityListToDB(tasks);
+            entityManipulator.addEntityListToDB(checklists);
+            stopTime = System.nanoTime();
+            executionTime = (float) (stopTime - startTime) / (float) Math.pow(10, 9);
+            System.out.printf("Execution time: %.6f seconds\n", executionTime);
+        } catch (Exception e) {
+            System.out.println("Error while filling database : ");
+            e.printStackTrace();
+        }
     }
 
+    @MeasuredFunction(name = "dropDatabase")
     public void dropCurrentDataBase() {
         //Удаление всех записей из таблиц
-        List games = entityManipulator.queryEntity("FROM Game");
-        List cities = entityManipulator.queryEntity("FROM City");
-        List people = entityManipulator.queryEntity("FROM Person");
-        List projects = entityManipulator.queryEntity("FROM Project");
-        List tasks = entityManipulator.queryEntity("FROM Task");
-        List checklists = entityManipulator.queryEntity("FROM Checklist");
-        entityManipulator.deleteEntityListFromDB(checklists);
-        entityManipulator.deleteEntityListFromDB(tasks);
-        entityManipulator.deleteEntityListFromDB(projects);
-        entityManipulator.deleteEntityListFromDB(people);
-        entityManipulator.deleteEntityListFromDB(games);
-        entityManipulator.deleteEntityListFromDB(cities);
+
+        List games = null;
+        List cities = null;
+        List people = null;
+        List projects = null;
+        List tasks = null;
+        List checklists = null;
+        try {
+            games = entityManipulator.queryEntity("FROM Game");
+            cities = entityManipulator.queryEntity("FROM City");
+            people = entityManipulator.queryEntity("FROM Person");
+            projects = entityManipulator.queryEntity("FROM Project");
+            tasks = entityManipulator.queryEntity("FROM Task");
+            checklists = entityManipulator.queryEntity("FROM Checklist");
+        } catch (Exception e) {
+            System.out.println("Error while queering entities");
+            e.printStackTrace();
+        }
+        System.out.println("Deleting : " +
+                    "\nGames : " + games.size() +
+                    "\nCities : " + cities.size() +
+                    "\nPersons : " + people.size() +
+                    "\nProjects : " + projects.size() +
+                    "\nTasks : " + tasks.size() +
+                    "\nChecklists : " + checklists.size());
+        try {
+            entityManipulator.deleteEntityListFromDB(checklists);
+            entityManipulator.deleteEntityListFromDB(tasks);
+            entityManipulator.deleteEntityListFromDB(projects);
+            entityManipulator.deleteEntityListFromDB(people);
+            entityManipulator.deleteEntityListFromDB(games);
+            entityManipulator.deleteEntityListFromDB(cities);
+        } catch (Exception e) {
+            System.out.println("Error while deleting entities");
+            e.printStackTrace();
+        }
+
     }
 }

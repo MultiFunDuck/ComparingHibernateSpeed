@@ -1,0 +1,23 @@
+FROM City
+FROM Game
+FROM Person
+FROM Project
+FROM Task
+FROM Checklist
+SELECT distinct c FROM City c
+SELECT distinct g FROM Game g
+SELECT distinct p FROM Person p
+SELECT distinct pr FROM Project pr
+SELECT distinct t FROM Task t
+SELECT distinct ch FROM Checklist ch
+SELECT COUNT(c) FROM City c
+SELECT COUNT(g) FROM Game g
+SELECT COUNT(p) FROM Person p
+SELECT COUNT(pr) FROM Project pr
+SELECT COUNT(t) FROM Task t
+SELECT COUNT(ch) FROM Checklist ch
+SELECT p.name, p.email FROM Person p
+SELECT p.name, p.city FROM Person p
+SELECT p, pr FROM Person p, Project pr WHERE pr.manager = p
+SELECT p.name, pr.name FROM Person p, Project pr
+SELECT p, pr FROM Person p, Project pr

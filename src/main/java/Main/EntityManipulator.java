@@ -2,6 +2,7 @@ package Main;
 
 import Enteties.DataBaseEntity;
 import org.hibernate.HibernateException;
+import org.hibernate.QueryException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
@@ -19,81 +20,88 @@ public class EntityManipulator {
         this.session = session;
     }
 
+
     //Добавление сущности DataBaseEntity в базу данных
-    public void addEntityToDB(DataBaseEntity dataBaseEntity) {
-        try {
-            session = sessionFactory.getCurrentSession();
-            session.beginTransaction();
-            session.save(dataBaseEntity);
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+    @MeasuredFunction(name = "addEntity")
+    public void addEntityToDB(DataBaseEntity dataBaseEntity) throws Exception {
+        session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
+        session.save(dataBaseEntity);
+        session.getTransaction().commit();
+        session.close();
     }
+
 
     //Удаление сущности DataBaseEntity из базы данных
-    public void deleteEntityFromDB(DataBaseEntity dataBaseEntity) {
-        try {
-            session = sessionFactory.getCurrentSession();
-            session.beginTransaction();
-            session.delete(dataBaseEntity);
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+    @MeasuredFunction(name = "deleteEntity")
+    public void deleteEntityFromDB(DataBaseEntity dataBaseEntity) throws Exception {
+        session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
+        session.delete(dataBaseEntity);
+        session.getTransaction().commit();
+        session.close();
     }
 
+
     //Чтение сущности из базы с нужным id
-    public DataBaseEntity readEntityFromDB(int id, Class<? extends DataBaseEntity> dataBaseEntityClass) {
+    @MeasuredFunction(name = "readEntity")
+    public DataBaseEntity readEntityFromDB(int id, Class<? extends DataBaseEntity> dataBaseEntityClass) throws Exception {
         DataBaseEntity dataBaseEntity = null;
 
-        try {
-            session = sessionFactory.getCurrentSession();
-            session.beginTransaction();
+        session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
 
-            dataBaseEntity = session.get(dataBaseEntityClass, id);
+        dataBaseEntity = session.get(dataBaseEntityClass, id);
 
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+        session.getTransaction().commit();
+        session.close();
 
         return dataBaseEntity;
     }
 
-    public List<? extends DataBaseEntity> queryEntity(String hqlRequest) {
+
+    @MeasuredFunction(name = "queryEntityList")
+    public List<? extends DataBaseEntity> queryEntity(String hqlRequest) throws Exception {
 
         List<? extends DataBaseEntity> dataBaseEntities = null;
 
-        try {
-            session = sessionFactory.getCurrentSession();
-            session.beginTransaction();
+        session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
 
-            dataBaseEntities = session.createQuery(hqlRequest).list();
+        dataBaseEntities = session.createQuery(hqlRequest).list();
 
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            e.printStackTrace();
-        } finally {
-            session.close();
-        }
+        session.getTransaction().commit();
+        session.close();
 
         return dataBaseEntities;
     }
 
-    public void addEntityListToDB(List<? extends DataBaseEntity> dataBaseEntities) {
+    @MeasuredFunction(name = "queryNumOfEntities")
+    public int queryNumOfEntities(String hqlRequest) throws Exception {
+
+        List<? extends DataBaseEntity> dataBaseEntities = null;
+
+        session = sessionFactory.getCurrentSession();
+        session.beginTransaction();
+
+        int numOfNotes = session.createQuery(hqlRequest).list().size();
+
+        session.getTransaction().commit();
+        session.close();
+        return numOfNotes;
+    }
+
+
+    @MeasuredFunction(name = "addEntityList")
+    public void addEntityListToDB(List<? extends DataBaseEntity> dataBaseEntities) throws Exception {
         for (DataBaseEntity dataBaseEntity : dataBaseEntities) {
             addEntityToDB(dataBaseEntity);
         }
     }
 
-    public void deleteEntityListFromDB(List<? extends DataBaseEntity> dataBaseEntities) {
+
+    @MeasuredFunction(name = "deleteEntityList")
+    public void deleteEntityListFromDB(List<? extends DataBaseEntity> dataBaseEntities) throws Exception {
         for (DataBaseEntity dataBaseEntity : dataBaseEntities) {
             deleteEntityFromDB(dataBaseEntity);
         }
